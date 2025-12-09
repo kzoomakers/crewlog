@@ -6,15 +6,15 @@ Run this after the application starts for the first time.
 import sys
 import os
 
-# Add the parent directory to the path so we can import togger
+# Add the parent directory to the path so we can import crewlog
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from togger import application, db
+from crewlog import application, db
 # Import all models to ensure SQLAlchemy relationships are properly configured
-from togger.auth.models import User, Role
-from togger.calendar.models import Calendar, Share
-from togger.event.models import Event, Shift
-from togger.auth.auth_dao import get_user, add_user
+from crewlog.auth.models import User, Role
+from crewlog.calendar.models import Calendar, Share
+from crewlog.event.models import Event, Shift
+from crewlog.auth.auth_dao import get_user, add_user
 
 def seed_demo_user():
     """Create demo user if it doesn't exist."""

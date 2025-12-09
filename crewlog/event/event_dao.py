@@ -7,8 +7,8 @@ from dateutil.tz import UTC
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
-from togger import db
-from togger.calendar import calendar_dao
+from crewlog import db
+from crewlog.calendar import calendar_dao
 from .models import Shift, Event, RecurEvent
 from ..auth import auth_dao
 from ..auth.models import Role

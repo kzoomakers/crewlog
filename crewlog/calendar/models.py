@@ -5,8 +5,8 @@ from json import loads
 from itsdangerous import URLSafeSerializer, BadSignature
 from sqlalchemy import JSON
 
-from togger import db
-from togger.database import GUID
+from crewlog import db
+from crewlog.database import GUID
 
 default_settings = "{\"firstDay\": \"1\"," \
                    " \"nextDayThreshold\": \"00:00:00\"," \

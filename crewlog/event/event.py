@@ -8,9 +8,9 @@ from flask import Blueprint, render_template, request
 from flask_login import login_manager, LoginManager
 from flask_wtf import FlaskForm
 
-from togger import application
-from togger.event import event_dao
-from togger.event.models import Event
+from crewlog import application
+from crewlog.event import event_dao
+from crewlog.event.models import Event
 
 bp = Blueprint("event", __name__, template_folder="templates")
 login_manager = LoginManager()

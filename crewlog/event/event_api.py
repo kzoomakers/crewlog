@@ -6,8 +6,8 @@ from dateutil import parser
 from dateutil.tz import UTC
 from flask import Blueprint, request, jsonify
 
-from togger import db
-from togger.event import event_dao
+from crewlog import db
+from crewlog.event import event_dao
 
 bp = Blueprint("event_api", __name__, url_prefix="/api/v1/calendars/events")
 

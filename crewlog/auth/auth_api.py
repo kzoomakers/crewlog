@@ -3,8 +3,8 @@ from flask import Blueprint, request, flash, url_for
 from flask_login import login_required
 from werkzeug.utils import redirect
 
-from togger.auth import auth_dao
-from togger.auth.auth import render_password
+from crewlog.auth import auth_dao
+from crewlog.auth.auth import render_password
 
 bp = Blueprint("auth_api", __name__, url_prefix="/api/v1/users")
 

@@ -2,10 +2,10 @@ import flask_login
 from flask import flash
 from flask.json import dumps
 
-from togger import db
-from togger.auth import auth_dao
-from togger.auth.models import Role
-from togger.calendar.models import Share, Calendar
+from crewlog import db
+from crewlog.auth import auth_dao
+from crewlog.auth.models import Role
+from crewlog.calendar.models import Share, Calendar
 
 
 @auth_dao.has_role(Role.OWNER)

@@ -1,10 +1,10 @@
 import flask_login
 from flask import request, render_template, redirect, url_for
 
-from togger import application
-from togger.auth import auth_dao, auth_api
-from togger.calendar import calendar_dao, calendar, calendar_api
-from togger.event import event, event_api, event_dao
+from crewlog import application
+from crewlog.auth import auth_dao, auth_api
+from crewlog.calendar import calendar_dao, calendar, calendar_api
+from crewlog.event import event, event_api, event_dao
 from .auth import auth
 
 application.register_blueprint(event.bp)

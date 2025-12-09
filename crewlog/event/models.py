@@ -3,8 +3,8 @@ import uuid
 from sqlalchemy import UniqueConstraint
 from sqlalchemy.ext.declarative import declared_attr
 
-from togger import db
-from togger.database import GUID, same_as
+from crewlog import db
+from crewlog.database import GUID, same_as
 
 
 class EventBase(db.Model):

@@ -2,9 +2,9 @@ import flask_login
 from flask import Blueprint, request, url_for, flash
 from werkzeug.utils import redirect
 
-from togger.auth import auth_dao
-from togger.auth.models import Role
-from togger.calendar import calendar_dao
+from crewlog.auth import auth_dao
+from crewlog.auth.models import Role
+from crewlog.calendar import calendar_dao
 
 bp = Blueprint("calendar_api", __name__, url_prefix="/api/v1/calendars")
 

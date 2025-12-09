@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  togger:
+  crewlog:
     build: .
-    container_name: togger-app
+    container_name: crewlog-app
     restart: unless-stopped
     ports:
       - "5001:5000"
     environment:
-      - FLASK_APP=togger.main:application
+      - FLASK_APP=crewlog.main:application
       - FLASK_ENV=development
       - SECRET_KEY=${SECRET_KEY:-change-me-to-something-secure}
       - SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_DATABASE_URI:-sqlite:///resources/database.db}
@@ -19,7 +19,7 @@ services:
       - SMTP_PORT=${SMTP_PORT:-}
       - SMTP_SERVER=${SMTP_SERVER:-}
     volumes:
-      - ./togger/resources:/app/togger/resources
+      - ./crewlog/resources:/app/crewlog/resources
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/"]
       interval: 30s
@@ -27,8 +27,8 @@ services:
       retries: 3
       start_period: 40s
     networks:
-      - togger-network
+      - crewlog-network
 
 networks:
-  togger-network:
+  crewlog-network:
     driver: bridge

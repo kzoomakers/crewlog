@@ -6,8 +6,8 @@ from itsdangerous import URLSafeSerializer, BadSignature
 from sqlalchemy import UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from togger import db
-from togger.database import GUID
+from crewlog import db
+from crewlog.database import GUID
 
 
 def _gen_valid_until():

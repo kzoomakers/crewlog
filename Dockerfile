@@ -17,10 +17,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY . .
 
 # Create directory for SQLite database
-RUN mkdir -p /app/togger/resources
+RUN mkdir -p /app/crewlog/resources
 
 # Expose port
 EXPOSE 5000
 
 # Run database migrations, seed demo user, and start the application
-CMD flask db upgrade && python seed_demo_user.py && gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 120 togger.main:application
+CMD flask db upgrade && python seed_demo_user.py && gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 120 crewlog.main:application

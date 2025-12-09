@@ -3,11 +3,11 @@ from flask import Blueprint, render_template, request
 from flask_login import login_manager, LoginManager
 from flask_wtf import FlaskForm
 
-from togger import application
-from togger.auth import auth_dao
-from togger.auth.models import Role
-from togger.calendar import calendar_dao
-from togger.calendar.calendar_forms import DeleteForm, NewForm, SettingsForm
+from crewlog import application
+from crewlog.auth import auth_dao
+from crewlog.auth.models import Role
+from crewlog.calendar import calendar_dao
+from crewlog.calendar.calendar_forms import DeleteForm, NewForm, SettingsForm
 
 bp = Blueprint("calendar", __name__, template_folder="templates")
 login_manager = LoginManager()

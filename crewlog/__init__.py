@@ -14,7 +14,7 @@ csp = {
 application = Flask(__name__)
 talisman = Talisman(application, content_security_policy=csp)
 CSRFProtect(application)
-application.config.from_object('togger.default_settings')
+application.config.from_object('crewlog.default_settings')
 if os.environ.get("SECRET_KEY"):
     application.secret_key = os.environ.get("SECRET_KEY")
 if os.environ.get("SQLALCHEMY_DATABASE_URI"):

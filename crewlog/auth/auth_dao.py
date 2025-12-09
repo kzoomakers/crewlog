@@ -6,9 +6,9 @@ from threading import Thread
 import flask_login
 from flask import flash, current_app
 
-from togger import db
-from togger.auth.models import User, Role
-from togger.calendar.models import Calendar
+from crewlog import db
+from crewlog.auth.models import User, Role
+from crewlog.calendar.models import Calendar
 
 
 def get_user(username):
@@ -50,7 +50,7 @@ def update_user(first_name, last_name):
 def verify_email(user):
     token = user.generate_validate_token()
     url = current_app.config['APP_URL'] + "/auth/verify/" + token
-    subject = "[Togger] Welcome to Togger. Verify your email"
+    subject = "[CrewLog] Welcome to CrewLog. Verify your email"
     prepare_email(user.username, subject, url)
 
 
@@ -73,7 +73,7 @@ def password_email(username):
     if user and user.is_verified:
         token = user.generate_password_token()
         url = current_app.config['APP_URL'] + "/auth/restore/" + token
-        subject = "[Togger] Forgot your password? The restoration link is inside"
+        subject = "[CrewLog] Forgot your password? The restoration link is inside"
         prepare_email(user.username, subject, url)
 
 
