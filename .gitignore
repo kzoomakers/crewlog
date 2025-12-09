@@ -5,3 +5,4 @@
 /.directory
 /togger/resources/auth.json
 /togger/resources/togger.json
+togger/resources/database.db

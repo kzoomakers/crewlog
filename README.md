@@ -1,13 +1,13 @@
 # togger
-Togger is an easy to use sign up sheet for volunteers. Also can be used for various events planing like football matches 
-or going out with friends
+Togger is an easy to use sign up sheet for volunteers. Also can be used for various events planning like football matches
+or going out with friends.
 
 # demo
-URL: https://togger-app.herokuapp.com (can take few moments for a cold boot)  
-user: demo@github.com  
+URL: https://togger-app.herokuapp.com (can take few moments for a cold boot)
+user: demo@github.com
 pass: demo
 
-Registration doesn't require an email verification (but it will still annoy you because this is an only way to recover lost password). 
+Registration doesn't require an email verification (but it will still annoy you because this is the only way to recover lost password).
 # features
 * Plan events. Even recurrent ones. Resize and drag em how you want
 * Sign up yourself or your friend for a shift
@@ -36,41 +36,111 @@ Registration doesn't require an email verification (but it will still annoy you 
 ![create view](/screenshots/create_view.png?raw=true "Create View")
 ![report_view](/screenshots/report_view.png?raw=true "Report View")
 
-# docker-compose
+# Local Development with Docker Compose
+
+## Prerequisites
+- Docker and Docker Compose installed on your system
+- Git (to clone the repository)
+
+## Quick Start
+
+1. **Clone the repository** (if you haven't already):
+   ```bash
+   git clone <repository-url>
+   cd togger
+   ```
+
+2. **Configure environment variables**:
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit the `.env` file and update the following variables:
+   - `SECRET_KEY`: Change to a secure random string (required for production)
+   - `SQLALCHEMY_DATABASE_URI`: Database connection string (default: SQLite)
+   - `APP_URL`: Your application URL (default: http://localhost:5001)
+   - `SMTP_*`: Email server settings (optional, for password recovery)
+
+3. **Build and start the application**:
+   ```bash
+   docker-compose up --build
+   ```
+   
+   The application will be available at: **http://localhost:5001**
+
+4. **Database migrations** are automatically applied on startup. If you need to run them manually:
+   ```bash
+   docker-compose exec togger flask db upgrade
+   ```
+
+## Configuration Options
+
+### Database Options
+
+**SQLite (Default)**:
+```env
+SQLALCHEMY_DATABASE_URI=sqlite:///resources/database.db
 ```
-version: '3'
-services:
-  togger:
-    restart: always
-    environment:
-      - SECRET_KEY=change-me
-      - FLASK_ENV=development
-      - SQLALCHEMY_DATABASE_URI=sqlite:///resources/database.db
-      - MODULE_NAME=togger.main
-      - VARIABLE_NAME=application
-      - APP_URL=localhost
-      - SMTP_LOGIN=
-      - SMTP_MAILBOX=
-      - SMTP_PASSWORD=
-      - SMTP_PORT=
-      - SMTP_SERVER=
-    build: .
-    ports:
-      - "5001:80"
+Data persists in `./togger/resources/database.db`
+
+**PostgreSQL**:
+```env
+SQLALCHEMY_DATABASE_URI=postgresql://username:password@host:5432/database_name
 ```
-* Change SECRET_KEY to something more secure
-* Put your database uri in SQLALCHEMY_DATABASE_URI or use sqlite by default (was tested with sqlite and postgresql only)
-* Change APP_URL to you real app url (used in emails)
-* Put SMTP parameters for an email validation and a password recovery
-* Change FLASK_ENV according to your environment
 
-run
+### Email Configuration (Optional)
 
-`$ docker-compose up`
+For password recovery and email verification, configure SMTP settings:
+```env
+SMTP_LOGIN=your-email@example.com
+SMTP_MAILBOX=your-email@example.com
+SMTP_PASSWORD=your-password
+SMTP_PORT=587
+SMTP_SERVER=smtp.example.com
+```
 
-Currently ARM isn't supported, but feel free to use your own base image.
+## Docker Commands
 
-The repository also contains Procfile to run the app on heroku
+**Start the application**:
+```bash
+docker-compose up
+```
+
+**Start in detached mode** (background):
+```bash
+docker-compose up -d
+```
+
+**Stop the application**:
+```bash
+docker-compose down
+```
+
+**View logs**:
+```bash
+docker-compose logs -f togger
+```
+
+**Rebuild after code changes**:
+```bash
+docker-compose up --build
+```
+
+**Access the container shell**:
+```bash
+docker-compose exec togger bash
+```
+
+## Development Notes
+
+- The SQLite database file is persisted in `./togger/resources/` via Docker volume
+- The application runs on port 5001 by default (configurable in [`docker-compose.yml`](docker-compose.yml:11))
+- Hot reload is enabled in development mode
+- Tested with SQLite and PostgreSQL databases
+
+## Heroku Deployment
+
+The repository contains a [`Procfile`](Procfile:1) for Heroku deployment. The Heroku-specific configuration has been preserved for backward compatibility.
 
 # TODO
 * add LDAP auth
