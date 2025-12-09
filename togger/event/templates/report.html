@@ -6,7 +6,7 @@
     {% if current_role() %}
     <h1>Shift report for {{ current_role().calendar.name }}</h1>
     <form action="/report" method="get">
-        <div class="form-row mb-2">
+        <div class="form-row mb-2 align-items-center">
             <div class="col-auto">
                 <div class="input-group input-daterange" id="input-daterange">
                     <div class="input-group-prepend">
@@ -17,7 +17,17 @@
                     </div>
                 </div>
             </div>
-            <input class="btn btn-primary" type="submit" value="go">
+            <div class="col-auto">
+                <select class="form-control" name="user" id="user">
+                    <option value="">All Users</option>
+                    {% for user in all_users %}
+                    <option value="{{ user }}" {% if selected_user == user %}selected{% endif %}>{{ user }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <input class="btn btn-primary" type="submit" value="go">
+            </div>
         </div>
     </form>
     {% for item in report %}

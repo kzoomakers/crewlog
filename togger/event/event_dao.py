@@ -172,23 +172,42 @@ def save_shift(event_id=None, new_person_name=None, shift_ids_to_remove=[], recu
     return True
 
 
+def get_all_users():
+    """Get all unique users who have shifts in the current calendar."""
+    if calendar_dao.get_current_calendar():
+        calendar_id = calendar_dao.get_current_calendar().id
+        users = db.session.query(Shift.person) \
+            .join(Event, Shift.event_id == Event.id) \
+            .filter(Event.calendar_id == calendar_id) \
+            .distinct() \
+            .order_by(Shift.person) \
+            .all()
+        return [user[0] for user in users]
+    return []
+
+
 @auth_dao.has_role(Role.MANAGER)
-def get_report(start, end, calendar_name="default"):
+def get_report(start, end, calendar_name="default", user_filter=None):
     if calendar_dao.get_current_calendar():
         calendar_id = calendar_dao.get_current_calendar().id
         # Get all shifts with their event details for the report
-        shifts_data = db.session.query(
+        # Join Shift to Event via the event_id foreign key
+        query = db.session.query(
             Shift.person,
             Event.title,
             Event.start,
             Event.end
         ) \
-            .join(Event.shifts) \
+            .join(Event, Shift.event_id == Event.id) \
             .filter(Event.calendar_id == calendar_id) \
             .filter(Event.start <= end) \
-            .filter(Event.end >= start) \
-            .order_by(Shift.person, Event.start) \
-            .all()
+            .filter(Event.end >= start)
+        
+        # Apply user filter if specified
+        if user_filter:
+            query = query.filter(Shift.person == user_filter)
+        
+        shifts_data = query.order_by(Shift.person, Event.start).all()
         
         # Process the data to calculate hours and group by person
         report = {}

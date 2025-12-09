@@ -27,8 +27,18 @@ def render_report():
     if not end_str:
         end_str = datetime.today().strftime('%d-%m-%Y')
     end = (parser.parse(end_str, dayfirst=True) + timedelta(days=1)).astimezone(UTC)
-    report = event_dao.get_report(start=start, end=end)
-    return render_template('report.html', report=report, start=start_str, end=end_str)
+    
+    # Get user filter from query params
+    user_filter = request.args.get('user')
+    if user_filter == '':
+        user_filter = None
+    
+    # Get all users for the dropdown
+    all_users = event_dao.get_all_users()
+    
+    report = event_dao.get_report(start=start, end=end, user_filter=user_filter)
+    return render_template('report.html', report=report, start=start_str, end=end_str,
+                           all_users=all_users, selected_user=user_filter)
 
 
 @application.route('/render_shifts', methods=['GET'])
