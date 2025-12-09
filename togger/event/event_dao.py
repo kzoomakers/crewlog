@@ -176,13 +176,41 @@ def save_shift(event_id=None, new_person_name=None, shift_ids_to_remove=[], recu
 def get_report(start, end, calendar_name="default"):
     if calendar_dao.get_current_calendar():
         calendar_id = calendar_dao.get_current_calendar().id
-        report = db.session.query(Shift.person, func.count(Shift.person).label('total')) \
+        # Get all shifts with their event details for the report
+        shifts_data = db.session.query(
+            Shift.person,
+            Event.title,
+            Event.start,
+            Event.end
+        ) \
             .join(Event.shifts) \
             .filter(Event.calendar_id == calendar_id) \
             .filter(Event.start <= end) \
             .filter(Event.end >= start) \
-            .group_by(Shift.person).all()
-        return report
+            .order_by(Shift.person, Event.start) \
+            .all()
+        
+        # Process the data to calculate hours and group by person
+        report = {}
+        for person, title, event_start, event_end in shifts_data:
+            if person not in report:
+                report[person] = {
+                    'person': person,
+                    'total_hours': 0,
+                    'shifts': []
+                }
+            
+            # Calculate duration in hours
+            duration = (event_end - event_start).total_seconds() / 3600.0
+            report[person]['total_hours'] += duration
+            report[person]['shifts'].append({
+                'title': title,
+                'start': event_start,
+                'end': event_end,
+                'duration': duration
+            })
+        
+        return list(report.values())
     else:
         return None
 

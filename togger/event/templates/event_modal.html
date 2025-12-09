@@ -26,17 +26,54 @@
                                   placeholder="event description"
                                   rows="3">{{ event.description if event.description }}</textarea>
         </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="startDate">Start Date</label>
+                <input type="date" class="form-control" id="startDate" name="startDate"
+                       value="{% if event.start %}{% if event.start.tzinfo %}{{ event.start.astimezone(timezone).strftime('%Y-%m-%d') }}{% else %}{{ event.start.strftime('%Y-%m-%d') }}{% endif %}{% endif %}" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="startTime">Start Time</label>
+                <input type="time" class="form-control" id="startTime" name="startTime"
+                       value="{% if event.start %}{% if event.start.tzinfo %}{{ event.start.astimezone(timezone).strftime('%H:%M') }}{% else %}{{ event.start.strftime('%H:%M') }}{% endif %}{% endif %}" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="endDate">End Date</label>
+                <input type="date" class="form-control" id="endDate" name="endDate"
+                       value="{% if event.end %}{% if event.end.tzinfo %}{{ event.end.astimezone(timezone).strftime('%Y-%m-%d') }}{% else %}{{ event.end.strftime('%Y-%m-%d') }}{% endif %}{% endif %}" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="endTime">End Time</label>
+                <input type="time" class="form-control" id="endTime" name="endTime"
+                       value="{% if event.end %}{% if event.end.tzinfo %}{{ event.end.astimezone(timezone).strftime('%H:%M') }}{% else %}{{ event.end.strftime('%H:%M') }}{% endif %}{% endif %}" required>
+            </div>
+        </div>
         {% with weekday=get_weekday(event.start, timezone) %}
         {% include 'rrule_generator.html' %}
         {% endwith %}
     </form>
+    <script>
+        // Add event listeners for date/time inputs to update hidden fields
+        document.getElementById('startDate').addEventListener('change', updateDateTime);
+        document.getElementById('startTime').addEventListener('change', updateDateTime);
+        document.getElementById('endDate').addEventListener('change', updateDateTime);
+        document.getElementById('endTime').addEventListener('change', updateDateTime);
+        
+        // Also update on input (for immediate feedback)
+        document.getElementById('startDate').addEventListener('input', updateDateTime);
+        document.getElementById('startTime').addEventListener('input', updateDateTime);
+        document.getElementById('endDate').addEventListener('input', updateDateTime);
+        document.getElementById('endTime').addEventListener('input', updateDateTime);
+    </script>
 </div>
 <div class="modal-footer">
     {% if event.recur_id and not event.id %}
     <div class="input-group segmented order-3">
         <div class="input-group-prepend">
             <button class="btn btn-primary"
-                    onclick="submit_modal(modalForm, modal, '{{ url_for('event_api.post_event') }}')"
+                    onclick="updateDateTime(); submit_modal(modalForm, modal, '{{ url_for('event_api.post_event') }}')"
                     type="button">Save changes
             </button>
             <button aria-expanded="false" aria-haspopup="true"
@@ -46,7 +83,7 @@
             </button>
             <div class="dropdown-menu">
                 <button class="dropdown-item"
-                        onclick="submit_modal(modalForm, modal, '{{ url_for('event_api.post_recurrent') }}')">
+                        onclick="updateDateTime(); submit_modal(modalForm, modal, '{{ url_for('event_api.post_recurrent') }}')">
                     This and following events
                 </button>
             </div>
@@ -54,7 +91,7 @@
     </div>
     <div class="input-group mr-auto segmented order-1">
         <div class="input-group-prepend">
-            <button class="btn btn-danger" onclick="submit_modal(modalForm, modal, '{{ url_for('event_api.delete_recurrent_event') }}',
+            <button class="btn btn-danger" onclick="updateDateTime(); submit_modal(modalForm, modal, '{{ url_for('event_api.delete_recurrent_event') }}',
                               'DELETE')"
                     type="button">Delete
             </button>
@@ -65,20 +102,20 @@
             </button>
             <div class="dropdown-menu">
                 <button class="dropdown-item"
-                        onclick="submit_modal(modalForm, modal, '{{ url_for('event_api.delete_event') }}',
+                        onclick="updateDateTime(); submit_modal(modalForm, modal, '{{ url_for('event_api.delete_event') }}',
                               'DELETE')">This and following events
                 </button>
             </div>
         </div>
     </div>
     {% else %}
-    <button class="btn btn-primary order-3" form="modalForm"
-            onclick="submit_modal(modalForm, modal, '{{ url_for('event_api.post_event') }}')"
-            type="submit">Save changes
+    <button class="btn btn-primary order-3"
+            onclick="updateDateTime(); submit_modal(modalForm, modal, '{{ url_for('event_api.post_event') }}')"
+            type="button">Save changes
     </button>
     {% if event.id %}
-    <button class="btn btn-danger mr-auto order-1" form="modalForm"
-            onclick="submit_modal(modalForm, modal, '{{ url_for('event_api.delete_event') }}', 'DELETE')" type="submit">
+    <button class="btn btn-danger mr-auto order-1"
+            onclick="updateDateTime(); submit_modal(modalForm, modal, '{{ url_for('event_api.delete_event') }}', 'DELETE')" type="button">
         Delete
     </button>
     {% endif %}

@@ -50,6 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
         slotMinTime: "{{ settings.slotMinTime }}",
         nextDayThreshold: "{{ settings.nextDayThreshold }}",
         slotMaxTime: "{{ settings.slotMaxTime }}",
+        slotDuration: "00:15:00",
+        snapDuration: "00:15:00",
         expandRows: true,
         headerToolbar: {
             left: isMobile() ? 'prev,next' : 'prev,next today',
@@ -127,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var url;
             if (calendar.getOption("editable")){
                 if (info.event.id) {
-                    url = '/render_event?id=' + info.event.id;
+                    url = '/render_event?id=' + info.event.id + '&timeZone=' + getTimeZone();
                 } else {
                     url = '/render_event?recurId=' + info.event.extendedProps.recurId +
                                         '&start=' + info.event.start.toJSON() +

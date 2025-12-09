@@ -25,8 +25,26 @@ def get_events():
 @flask_login.login_required
 def post_event(all_day=False, event_id=None, recur_id=None, recurrent=None, description=None, init_start=None,
                timezone=None, recurrent_interval=None):
+    # Parse timezone first so we can use it for datetime conversion
+    if request.form['timeZone']:
+        timezone = pytz.timezone(request.form['timeZone'])
+    
+    # Parse start and end times
     start = parser.parse(request.form['start'])
     end = parser.parse(request.form['end'])
+    
+    # If the datetime is naive (no timezone info), localize it to the user's timezone
+    # then convert to UTC for storage
+    if start.tzinfo is None and timezone:
+        start = timezone.localize(start).astimezone(UTC).replace(tzinfo=None)
+    elif start.tzinfo is not None:
+        start = start.astimezone(UTC).replace(tzinfo=None)
+        
+    if end.tzinfo is None and timezone:
+        end = timezone.localize(end).astimezone(UTC).replace(tzinfo=None)
+    elif end.tzinfo is not None:
+        end = end.astimezone(UTC).replace(tzinfo=None)
+    
     title = request.form['eventTitle']
     if 'description' in request.form:
         description = request.form['description']
@@ -43,8 +61,6 @@ def post_event(all_day=False, event_id=None, recur_id=None, recurrent=None, desc
     if recur_id and not event_id:
         if 'initStart' in request.form:
             init_start = parser.parse(request.form['initStart'])
-    if request.form['timeZone']:
-        timezone = pytz.timezone(request.form['timeZone'])
     event_dao.save_event(title=title, description=description, start=start, end=end, all_day=all_day,
                          event_id=event_id, recur_id=recur_id, recurrent=recurrent,
                          recurrent_interval=recurrent_interval,

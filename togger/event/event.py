@@ -52,6 +52,9 @@ def render_shifts(time_zone=None):
 def render_event(timezone=None, recur_event=None):
     if request.args.get('timeZone'):
         timezone = pytz.timezone(request.args.get('timeZone'))
+    else:
+        # Default to UTC if no timezone provided
+        timezone = pytz.UTC
     event_id = request.args.get('id')
     recur_id = request.args.get('recurId')
 
@@ -62,6 +65,11 @@ def render_event(timezone=None, recur_event=None):
 
     if event_id:
         event = event_dao.get_event(event_id)
+        # Ensure event times have timezone info for proper display
+        if event and event.start and event.start.tzinfo is None:
+            event.start = pytz.UTC.localize(event.start)
+        if event and event.end and event.end.tzinfo is None:
+            event.end = pytz.UTC.localize(event.end)
     elif recur_id:
         event = event_dao.generate_event(recur_id, start=start, end=end)
         recur_event = event_dao.get_group_event(recur_id=recur_id)

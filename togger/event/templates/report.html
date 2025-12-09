@@ -20,22 +20,40 @@
             <input class="btn btn-primary" type="submit" value="go">
         </div>
     </form>
-    <table class="table">
-        <thead>
-        <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Shift Count</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for item in report %}
-        <tr>
-            <td>{{ item.person }}</td>
-            <td>{{ item.total }}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    {% for item in report %}
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="mb-0">
+                {{ item.person }}
+                <span class="badge badge-primary float-right">
+                    Total: {{ "%d"|format(item.total_hours|int) }}h {{ "%d"|format(((item.total_hours % 1) * 60)|int) }}m
+                </span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm">
+                <thead>
+                <tr>
+                    <th scope="col">Event</th>
+                    <th scope="col">Start</th>
+                    <th scope="col">End</th>
+                    <th scope="col">Duration</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for shift in item.shifts %}
+                <tr>
+                    <td>{{ shift.title }}</td>
+                    <td>{{ shift.start.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ shift.end.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ "%d"|format(shift.duration|int) }}h {{ "%d"|format(((shift.duration % 1) * 60)|int) }}m</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
     <script type="text/javascript">
     $('.input-daterange').datepicker({
         format: 'dd-mm-yyyy',
