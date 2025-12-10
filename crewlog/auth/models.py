@@ -26,6 +26,8 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(80), nullable=False)
     password = db.Column(db.String(100), nullable=False)
     is_verified = db.Column(db.Boolean, default=False, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     roles = db.relationship('Role', backref='User', cascade="all,delete", lazy=True)
 
     def set_password(self, password):
@@ -77,3 +79,65 @@ class Role(db.Model):
 
     def has_role(self, role_type):
         return self.type >= role_type
+
+
+class EmailConfig(db.Model):
+    """Email configuration model for storing SMTP/SendGrid/SMTP2GO settings."""
+    
+    # Email provider types
+    PROVIDER_SMTP = 'smtp'
+    PROVIDER_SENDGRID = 'sendgrid'
+    PROVIDER_SMTP2GO = 'smtp2go'
+    
+    id = db.Column(GUID(), primary_key=True, default=uuid.uuid4)
+    provider = db.Column(db.String(20), nullable=False, default=PROVIDER_SMTP)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    
+    # Standard SMTP settings
+    smtp_server = db.Column(db.String(255), nullable=True)
+    smtp_port = db.Column(db.Integer, nullable=True)
+    smtp_login = db.Column(db.String(255), nullable=True)
+    smtp_password = db.Column(db.String(255), nullable=True)
+    smtp_mailbox = db.Column(db.String(255), nullable=True)
+    smtp_use_tls = db.Column(db.Boolean, default=True, nullable=False)
+    
+    # SendGrid settings
+    sendgrid_api_key = db.Column(db.String(255), nullable=True)
+    sendgrid_from_email = db.Column(db.String(255), nullable=True)
+    sendgrid_from_name = db.Column(db.String(255), nullable=True)
+    
+    # SMTP2GO settings
+    smtp2go_api_key = db.Column(db.String(255), nullable=True)
+    smtp2go_sender = db.Column(db.String(255), nullable=True)
+    
+    # Metadata
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_by_id = db.Column(GUID(), db.ForeignKey('user.id'), nullable=True)
+    created_by = db.relationship("User")
+    
+    def __repr__(self):
+        return f'<EmailConfig {self.provider} active={self.is_active}>'
+    
+    @classmethod
+    def get_active_config(cls):
+        """Get the currently active email configuration."""
+        return cls.query.filter_by(is_active=True).first()
+    
+    def to_dict(self):
+        """Convert config to dictionary (excluding sensitive data)."""
+        return {
+            'id': str(self.id),
+            'provider': self.provider,
+            'is_active': self.is_active,
+            'smtp_server': self.smtp_server,
+            'smtp_port': self.smtp_port,
+            'smtp_login': self.smtp_login,
+            'smtp_mailbox': self.smtp_mailbox,
+            'smtp_use_tls': self.smtp_use_tls,
+            'sendgrid_from_email': self.sendgrid_from_email,
+            'sendgrid_from_name': self.sendgrid_from_name,
+            'smtp2go_sender': self.smtp2go_sender,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None,
+        }

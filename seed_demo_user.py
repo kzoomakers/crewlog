@@ -17,7 +17,7 @@ from crewlog.event.models import Event, Shift
 from crewlog.auth.auth_dao import get_user, add_user
 
 def seed_demo_user():
-    """Create demo user if it doesn't exist."""
+    """Create demo user if it doesn't exist, or update existing to be admin."""
     with application.app_context():
         demo_email = "demo@github.com"
         demo_password = "demo"
@@ -25,7 +25,15 @@ def seed_demo_user():
         # Check if demo user already exists
         existing_user = get_user(demo_email)
         if existing_user:
-            print(f"Demo user '{demo_email}' already exists.")
+            # Update existing user to be admin if not already
+            if not existing_user.is_admin:
+                existing_user.is_admin = True
+                existing_user.is_verified = True
+                db.session.merge(existing_user)
+                db.session.commit()
+                print(f"Demo user '{demo_email}' updated to admin.")
+            else:
+                print(f"Demo user '{demo_email}' already exists and is admin.")
             return
         
         # Create demo user
@@ -37,14 +45,16 @@ def seed_demo_user():
             last_name="User"
         )
         
-        # Mark as verified to avoid email verification requirement
+        # Mark as verified and admin
         user.is_verified = True
+        user.is_admin = True
         db.session.merge(user)
         db.session.commit()
         
         print(f"Demo user created successfully!")
         print(f"  Email: {demo_email}")
         print(f"  Password: {demo_password}")
+        print(f"  Admin: Yes")
 
 if __name__ == "__main__":
     seed_demo_user()

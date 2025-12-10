@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}User Details{% endblock %}
+{% block main %}
+<main role="main" class="container">
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <h1>&#x1F464; User Details</h1>
+        <a href="{{ url_for('admin.users_list') }}" class="btn btn-secondary">&#x2190; Back to Users</a>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">{{ user.username }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <table class="table table-borderless">
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ user.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Name:</th>
+                            <td>{{ user.first_name }} {{ user.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td>
+                                {% if user.is_verified %}
+                                <span class="badge badge-success">Verified</span>
+                                {% else %}
+                                <span class="badge badge-warning">Unverified</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Role:</th>
+                            <td>
+                                {% if user.is_admin %}
+                                <span class="badge badge-primary">Administrator</span>
+                                {% else %}
+                                <span class="badge badge-secondary">User</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Created:</th>
+                            <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Calendars:</th>
+                            <td>{{ user.roles|length }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6>Actions</h6>
+                    <div class="btn-group-vertical w-100">
+                        <button class="btn btn-outline-primary text-left" 
+                                onclick="renderModal('{{ url_for('admin.render_user_edit', user_id=user.id) }}')">
+                            &#x270F; Edit User Details
+                        </button>
+                        <button class="btn btn-outline-warning text-left" 
+                                onclick="renderModal('{{ url_for('admin.render_reset_password', user_id=user.id) }}')">
+                            &#x1F511; Reset Password
+                        </button>
+                        {% if not user.is_verified %}
+                        <form action="{{ url_for('admin_api.verify_user', user_id=user.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-outline-success text-left w-100">
+                                &#x2713; Verify Email
+                            </button>
+                        </form>
+                        {% endif %}
+                        <form action="{{ url_for('admin_api.send_reset_email', user_id=user.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-outline-info text-left w-100">
+                                &#x2709; Send Password Reset Email
+                            </button>
+                        </form>
+                        {% if user.id != current_user.id %}
+                        <form action="{{ url_for('admin_api.toggle_admin', user_id=user.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-outline-{{ 'danger' if user.is_admin else 'info' }} text-left w-100">
+                                {% if user.is_admin %}&#x1F6AB; Revoke Admin{% else %}&#x1F451; Grant Admin{% endif %}
+                            </button>
+                        </form>
+                        <form action="{{ url_for('admin_api.delete_user', user_id=user.id) }}" method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                            <button type="submit" class="btn btn-outline-danger text-left w-100">
+                                &#x1F5D1; Delete User
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if user.roles %}
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Calendars</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Calendar Name</th>
+                        <th>Role</th>
+                        <th>Default</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for role in user.roles %}
+                    <tr>
+                        <td>{{ role.calendar.name }}</td>
+                        <td>
+                            {% if role.type == 100 %}
+                            <span class="badge badge-primary">Owner</span>
+                            {% elif role.type == 50 %}
+                            <span class="badge badge-info">Manager</span>
+                            {% else %}
+                            <span class="badge badge-secondary">User</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if role.is_default %}
+                            <span class="badge badge-success">Yes</span>
+                            {% else %}
+                            <span class="badge badge-secondary">No</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}

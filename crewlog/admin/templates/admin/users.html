@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}User Management{% endblock %}
+{% block main %}
+<main role="main" class="container">
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <h1>&#x1F465; User Management</h1>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">&#x2190; Back to Dashboard</a>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">All Users ({{ users|length }})</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Admin</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                {{ user.username }}
+                                {% if user.id == current_user.id %}
+                                <span class="badge badge-info">You</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.first_name }} {{ user.last_name }}</td>
+                            <td>
+                                {% if user.is_verified %}
+                                <span class="badge badge-success">Verified</span>
+                                {% else %}
+                                <span class="badge badge-warning">Unverified</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_admin %}
+                                <span class="badge badge-primary">Admin</span>
+                                {% else %}
+                                <span class="badge badge-secondary">User</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" 
+                                            onclick="renderModal('{{ url_for('admin.render_user_edit', user_id=user.id) }}')"
+                                            title="Edit User">
+                                        &#x270F;
+                                    </button>
+                                    <button class="btn btn-outline-warning" 
+                                            onclick="renderModal('{{ url_for('admin.render_reset_password', user_id=user.id) }}')"
+                                            title="Reset Password">
+                                        &#x1F511;
+                                    </button>
+                                    {% if not user.is_verified %}
+                                    <form action="{{ url_for('admin_api.verify_user', user_id=user.id) }}" method="post" style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-outline-success" title="Verify User">
+                                            &#x2713;
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    {% if user.id != current_user.id %}
+                                    <form action="{{ url_for('admin_api.toggle_admin', user_id=user.id) }}" method="post" style="display:inline;">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-outline-{{ 'danger' if user.is_admin else 'info' }}" 
+                                                title="{{ 'Revoke Admin' if user.is_admin else 'Grant Admin' }}">
+                                            {% if user.is_admin %}&#x1F6AB;{% else %}&#x1F451;{% endif %}
+                                        </button>
+                                    </form>
+                                    <form action="{{ url_for('admin_api.delete_user', user_id=user.id) }}" method="post" style="display:inline;"
+                                          onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                        <button type="submit" class="btn btn-outline-danger" title="Delete User">
+                                            &#x1F5D1;
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">&#x2139; Legend</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Actions:</strong></p>
+                    <ul class="list-unstyled">
+                        <li>&#x270F; - Edit user details (email, name, admin status)</li>
+                        <li>&#x1F511; - Reset user password</li>
+                        <li>&#x2713; - Manually verify user email</li>
+                        <li>&#x1F451; - Grant admin privileges</li>
+                        <li>&#x1F6AB; - Revoke admin privileges</li>
+                        <li>&#x1F5D1; - Delete user</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Status Badges:</strong></p>
+                    <ul class="list-unstyled">
+                        <li><span class="badge badge-success">Verified</span> - Email has been verified</li>
+                        <li><span class="badge badge-warning">Unverified</span> - Email not yet verified</li>
+                        <li><span class="badge badge-primary">Admin</span> - Has admin privileges</li>
+                        <li><span class="badge badge-secondary">User</span> - Regular user</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

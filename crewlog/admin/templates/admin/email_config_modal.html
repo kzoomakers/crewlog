@@ -1,0 +1,121 @@
+<div class="modal-header">
+    <h5 class="modal-title">{% if config %}Edit{% else %}New{% endif %} Email Configuration</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+<form action="{% if config %}{{ url_for('admin_api.update_email_config', config_id=config.id) }}{% else %}{{ url_for('admin_api.create_email_config') }}{% endif %}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="modal-body">
+        <div class="form-group">
+            <label for="provider">Provider</label>
+            <select class="form-control" id="provider" name="provider" onchange="toggleProviderFields()">
+                <option value="smtp" {% if config and config.provider == 'smtp' %}selected{% endif %}>Standard SMTP</option>
+                <option value="sendgrid" {% if config and config.provider == 'sendgrid' %}selected{% endif %}>SendGrid API</option>
+                <option value="smtp2go" {% if config and config.provider == 'smtp2go' %}selected{% endif %}>SMTP2GO API</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="is_active" name="is_active"
+                       {% if not config or config.is_active %}checked{% endif %}>
+                <label class="custom-control-label" for="is_active">Active</label>
+                <small class="form-text text-muted">Only one configuration can be active at a time.</small>
+            </div>
+        </div>
+        
+        <!-- SMTP Fields -->
+        <div id="smtp-fields">
+            <hr>
+            <h6>SMTP Settings</h6>
+            <div class="form-group">
+                <label for="smtp_server">SMTP Server</label>
+                <input type="text" class="form-control" id="smtp_server" name="smtp_server" 
+                       value="{{ config.smtp_server if config else '' }}" placeholder="smtp.example.com">
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="smtp_port">Port</label>
+                    <input type="number" class="form-control" id="smtp_port" name="smtp_port" 
+                           value="{{ config.smtp_port if config else '587' }}" placeholder="587">
+                </div>
+                <div class="form-group col-md-6">
+                    <div class="custom-control custom-checkbox mt-4">
+                        <input type="checkbox" class="custom-control-input" id="smtp_use_tls" name="smtp_use_tls"
+                               {% if not config or config.smtp_use_tls %}checked{% endif %}>
+                        <label class="custom-control-label" for="smtp_use_tls">Use TLS</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="smtp_login">Login</label>
+                <input type="text" class="form-control" id="smtp_login" name="smtp_login" 
+                       value="{{ config.smtp_login if config else '' }}" placeholder="username@example.com">
+            </div>
+            <div class="form-group">
+                <label for="smtp_password">Password</label>
+                <input type="password" class="form-control" id="smtp_password" name="smtp_password" 
+                       placeholder="{% if config %}Leave blank to keep current{% else %}Enter password{% endif %}">
+            </div>
+            <div class="form-group">
+                <label for="smtp_mailbox">From Email (Mailbox)</label>
+                <input type="email" class="form-control" id="smtp_mailbox" name="smtp_mailbox" 
+                       value="{{ config.smtp_mailbox if config else '' }}" placeholder="noreply@example.com">
+            </div>
+        </div>
+        
+        <!-- SendGrid Fields -->
+        <div id="sendgrid-fields" style="display:none;">
+            <hr>
+            <h6>SendGrid Settings</h6>
+            <div class="form-group">
+                <label for="sendgrid_api_key">API Key</label>
+                <input type="password" class="form-control" id="sendgrid_api_key" name="sendgrid_api_key" 
+                       placeholder="{% if config %}Leave blank to keep current{% else %}SG.xxxxx{% endif %}">
+            </div>
+            <div class="form-group">
+                <label for="sendgrid_from_email">From Email</label>
+                <input type="email" class="form-control" id="sendgrid_from_email" name="sendgrid_from_email" 
+                       value="{{ config.sendgrid_from_email if config else '' }}" placeholder="noreply@example.com">
+            </div>
+            <div class="form-group">
+                <label for="sendgrid_from_name">From Name (optional)</label>
+                <input type="text" class="form-control" id="sendgrid_from_name" name="sendgrid_from_name" 
+                       value="{{ config.sendgrid_from_name if config else '' }}" placeholder="CrewLog">
+            </div>
+        </div>
+        
+        <!-- SMTP2GO Fields -->
+        <div id="smtp2go-fields" style="display:none;">
+            <hr>
+            <h6>SMTP2GO Settings</h6>
+            <div class="form-group">
+                <label for="smtp2go_api_key">API Key</label>
+                <input type="password" class="form-control" id="smtp2go_api_key" name="smtp2go_api_key" 
+                       placeholder="{% if config %}Leave blank to keep current{% else %}api-xxxxx{% endif %}">
+            </div>
+            <div class="form-group">
+                <label for="smtp2go_sender">Sender Email</label>
+                <input type="email" class="form-control" id="smtp2go_sender" name="smtp2go_sender" 
+                       value="{{ config.smtp2go_sender if config else '' }}" placeholder="noreply@example.com">
+                <small class="form-text text-muted">Must be a verified sender in your SMTP2GO account.</small>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Configuration</button>
+    </div>
+</form>
+
+<script>
+function toggleProviderFields() {
+    var provider = document.getElementById('provider').value;
+    document.getElementById('smtp-fields').style.display = provider === 'smtp' ? 'block' : 'none';
+    document.getElementById('sendgrid-fields').style.display = provider === 'sendgrid' ? 'block' : 'none';
+    document.getElementById('smtp2go-fields').style.display = provider === 'smtp2go' ? 'block' : 'none';
+}
+// Initialize on load
+toggleProviderFields();
+</script>

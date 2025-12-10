@@ -1,5 +1,3 @@
-import smtplib
-from email.message import EmailMessage
 from functools import wraps
 from threading import Thread
 
@@ -78,22 +76,9 @@ def password_email(username):
 
 
 def prepare_email(address, subject, content):
-    thread = Thread(target=send_email,
-                    args=(address, subject, content, current_app.config,))
-    thread.daemon = True
-    thread.start()
-
-
-def send_email(username, subject, content, config):
-    msg = EmailMessage()
-    msg.set_content(content)
-    msg['Subject'] = subject
-    msg['From'] = config['SMTP_MAILBOX']
-    msg['To'] = username
-    s = smtplib.SMTP(config['SMTP_SERVER'], config['SMTP_PORT'])
-    s.login(config['SMTP_LOGIN'], config['SMTP_PASSWORD'])
-    s.send_message(msg)
-    s.quit()
+    """Send email using the configured email service."""
+    from crewlog.auth.email_service import send_email_async
+    send_email_async(address, subject, content)
 
 
 def confirm_verify_email(token):

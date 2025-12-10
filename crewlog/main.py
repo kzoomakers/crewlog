@@ -5,6 +5,7 @@ from crewlog import application
 from crewlog.auth import auth_dao, auth_api
 from crewlog.calendar import calendar_dao, calendar, calendar_api
 from crewlog.event import event, event_api, event_dao
+from crewlog.admin import admin, admin_api
 from .auth import auth
 
 application.register_blueprint(event.bp)
@@ -13,6 +14,8 @@ application.register_blueprint(calendar.bp)
 application.register_blueprint(calendar_api.bp)
 application.register_blueprint(auth_api.bp)
 application.register_blueprint(auth.bp)
+application.register_blueprint(admin.bp)
+application.register_blueprint(admin_api.bp)
 
 
 @application.route('/')
