@@ -6,12 +6,12 @@ services:
     container_name: crewlog-app
     restart: unless-stopped
     ports:
-      - "5001:5000"
+      - "5002:5000"
     environment:
       - FLASK_APP=crewlog.main:application
       - FLASK_ENV=development
       - SECRET_KEY=${SECRET_KEY:-change-me-to-something-secure}
-      - SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_DATABASE_URI:-sqlite:///resources/database.db}
+      - SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_DATABASE_URI:-sqlite:////app/crewlog/resources/database.db}
       - APP_URL=${APP_URL:-http://localhost:5001}
       - SMTP_LOGIN=${SMTP_LOGIN:-}
       - SMTP_MAILBOX=${SMTP_MAILBOX:-}

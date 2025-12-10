@@ -12,7 +12,9 @@ csp = {
 }
 
 application = Flask(__name__)
-talisman = Talisman(application, content_security_policy=csp)
+# Disable HTTPS redirect in development mode
+force_https = os.environ.get('FLASK_ENV') != 'development'
+talisman = Talisman(application, content_security_policy=csp, force_https=force_https)
 CSRFProtect(application)
 application.config.from_object('crewlog.default_settings')
 if os.environ.get("SECRET_KEY"):

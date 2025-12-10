@@ -1,6 +1,7 @@
 import uuid
 from datetime import date, timedelta, datetime
 
+from flask import current_app
 from flask_login import UserMixin
 from itsdangerous import URLSafeSerializer, BadSignature
 from sqlalchemy import UniqueConstraint
@@ -15,9 +16,12 @@ def _gen_valid_until():
     return valid_until
 
 
+def _get_auth_serializer(salt):
+    """Get a URLSafeSerializer with the current app's secret key."""
+    return URLSafeSerializer(current_app.config['SECRET_KEY'], salt)
+
+
 class User(db.Model, UserMixin):
-    auth_v = URLSafeSerializer(db.app.config['SECRET_KEY'], "validate")
-    auth_p = URLSafeSerializer(db.app.config['SECRET_KEY'], "password")
 
     id = db.Column(GUID(), primary_key=True, default=uuid.uuid4)
     alias_id = db.Column(GUID(), default=uuid.uuid4, nullable=False, unique=True)
@@ -38,22 +42,26 @@ class User(db.Model, UserMixin):
         return check_password_hash(self.password, password)
 
     def generate_validate_token(self):
-        return self.auth_v.dumps({"username": self.username, "valid_until": _gen_valid_until().strftime('%d-%m-%Y')})
+        auth_v = _get_auth_serializer("validate")
+        return auth_v.dumps({"username": self.username, "valid_until": _gen_valid_until().strftime('%d-%m-%Y')})
 
     def check_validate_token(self, token):
+        auth_v = _get_auth_serializer("validate")
         try:
-            data = self.auth_v.loads(token)
+            data = auth_v.loads(token)
         except BadSignature:
             return False
         self.username = data['username']
         return datetime.now() < datetime.strptime(data["valid_until"], '%d-%m-%Y')
 
     def generate_password_token(self):
-        return self.auth_p.dumps({"username": self.username, "valid_until": _gen_valid_until().strftime('%d-%m-%Y')})
+        auth_p = _get_auth_serializer("password")
+        return auth_p.dumps({"username": self.username, "valid_until": _gen_valid_until().strftime('%d-%m-%Y')})
 
     def check_password_token(self, token):
+        auth_p = _get_auth_serializer("password")
         try:
-            data = self.auth_p.loads(token)
+            data = auth_p.loads(token)
         except BadSignature:
             return False
         self.username = data['username']

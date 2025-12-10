@@ -2,6 +2,7 @@ import uuid
 from datetime import timedelta, date, datetime
 from json import loads
 
+from flask import current_app
 from itsdangerous import URLSafeSerializer, BadSignature
 from sqlalchemy import JSON
 
@@ -13,6 +14,11 @@ default_settings = "{\"firstDay\": \"1\"," \
                    " \"scrollTime\": \"16:00:00\", " \
                    "\"slotMaxTime\": \"22:00:00\", " \
                    "\"slotMinTime\": \"09:00:00\"}"
+
+
+def _get_share_serializer():
+    """Get a URLSafeSerializer with the current app's secret key."""
+    return URLSafeSerializer(current_app.config['SECRET_KEY'], "share")
 
 
 class Calendar(db.Model):
@@ -34,7 +40,6 @@ def _gen_valid_until(days=7, no_expiration=False):
 
 
 class Share:
-    auth_s = URLSafeSerializer(db.app.config['SECRET_KEY'], "share")
 
     def __init__(self, role_type=None, calendar_id=None, token=None, expiration_days=7, no_expiration=False):
         if token:
@@ -45,14 +50,16 @@ class Share:
             self.valid_until = _gen_valid_until(expiration_days, no_expiration)
 
     def generate_token(self):
+        auth_s = _get_share_serializer()
         valid_until_str = self.valid_until.strftime('%d-%m-%Y') if self.valid_until else 'never'
-        return self.auth_s.dumps(
+        return auth_s.dumps(
             {"role_type": self.role_type, "calendar_id": str(self.calendar_id),
              "valid_until": valid_until_str})
 
     def _load_token(self, token):
+        auth_s = _get_share_serializer()
         try:
-            data = self.auth_s.loads(token)
+            data = auth_s.loads(token)
             self.role_type = int(data["role_type"])
             self.calendar_id = uuid.UUID(data["calendar_id"])
             valid_until_str = data["valid_until"]
