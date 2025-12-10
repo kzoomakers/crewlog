@@ -50,6 +50,7 @@
                     }}</a>
                 <div aria-labelledby="dropdown01" class="dropdown-menu">
                     <form action="/api/v1/calendars/default" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         {% for role in roles() %}
                         {% if role.is_default %}
                         <button class="dropdown-item active show" name="calendarId" type="submit"

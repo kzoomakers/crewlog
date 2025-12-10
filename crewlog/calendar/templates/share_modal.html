@@ -33,8 +33,44 @@
                     </button>
                 </div>
             </div>
-            <small class="form-text text-muted" id="shareHelp">The link will be active next 7 days.</small></div>
+        </div>
+        <div class="form-group">
+            <label for="expirationDays">Link expiration</label>
+            <div class="input-group">
+                <input class="form-control" id="expirationDays" name="expirationDays" type="number"
+                       min="1" max="365" value="7" style="max-width: 100px;">
+                <div class="input-group-append">
+                    <span class="input-group-text">days</span>
+                </div>
+            </div>
+            <div class="form-check mt-2">
+                <input class="form-check-input" type="checkbox" id="noExpiration" name="noExpiration"
+                       onchange="toggleExpirationDays()">
+                <label class="form-check-label" for="noExpiration">
+                    Link does not expire
+                </label>
+            </div>
+            <small class="form-text text-muted" id="shareHelp">The link will be active for the specified number of days.</small>
+        </div>
     </form>
+    <script>
+        function toggleExpirationDays() {
+            var checkbox = document.getElementById('noExpiration');
+            var daysInput = document.getElementById('expirationDays');
+            daysInput.disabled = checkbox.checked;
+            if (checkbox.checked) {
+                document.getElementById('shareHelp').textContent = 'The link will never expire.';
+            } else {
+                document.getElementById('shareHelp').textContent = 'The link will be active for ' + daysInput.value + ' days.';
+            }
+        }
+        
+        document.getElementById('expirationDays').addEventListener('change', function() {
+            if (!document.getElementById('noExpiration').checked) {
+                document.getElementById('shareHelp').textContent = 'The link will be active for ' + this.value + ' days.';
+            }
+        });
+    </script>
 </div>
 <div class="modal-footer">
     <button class="btn btn-secondary" data-dismiss="modal" type="button">Close</button>

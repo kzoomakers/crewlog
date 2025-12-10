@@ -32,7 +32,9 @@ def delete_calendar():
 @auth_dao.has_role(Role.MANAGER)
 def post_share():
     role_name = int(request.form['roleName'])
-    share = calendar_dao.share_calendar(role_name)
+    expiration_days = int(request.form.get('expirationDays', 7))
+    no_expiration = request.form.get('noExpiration') == 'on'
+    share = calendar_dao.share_calendar(role_name, expiration_days, no_expiration)
     if share:
         url = request.host_url + "?share=" + share.generate_token()
     else:

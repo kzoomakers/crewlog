@@ -18,9 +18,10 @@ def save_settings(settings):
 
 
 @auth_dao.has_role(Role.MANAGER)
-def share_calendar(role_name):
+def share_calendar(role_name, expiration_days=7, no_expiration=False):
     if int(role_name) <= auth_dao.get_role().type and role_name < Role.OWNER:
-        return Share(role_type=role_name, calendar_id=get_current_calendar().id)
+        return Share(role_type=role_name, calendar_id=get_current_calendar().id,
+                     expiration_days=expiration_days, no_expiration=no_expiration)
 
 
 @auth_dao.has_role(Role.OWNER)

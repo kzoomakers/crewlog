@@ -196,7 +196,9 @@ def get_report(start, end, calendar_name="default", user_filter=None):
             Shift.person,
             Event.title,
             Event.start,
-            Event.end
+            Event.end,
+            Event.id,
+            Event.description
         ) \
             .join(Event, Shift.event_id == Event.id) \
             .filter(Event.calendar_id == calendar_id) \
@@ -211,7 +213,7 @@ def get_report(start, end, calendar_name="default", user_filter=None):
         
         # Process the data to calculate hours and group by person
         report = {}
-        for person, title, event_start, event_end in shifts_data:
+        for person, title, event_start, event_end, event_id, description in shifts_data:
             if person not in report:
                 report[person] = {
                     'person': person,
@@ -226,7 +228,9 @@ def get_report(start, end, calendar_name="default", user_filter=None):
                 'title': title,
                 'start': event_start,
                 'end': event_end,
-                'duration': duration
+                'duration': duration,
+                'event_id': str(event_id),
+                'description': description or ''
             })
         
         return list(report.values())

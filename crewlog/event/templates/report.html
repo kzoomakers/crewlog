@@ -2,6 +2,36 @@
 {% block title %}Report{% endblock %}
 {% block main %}
 
+<style>
+    .sortable th {
+        cursor: pointer;
+        user-select: none;
+        position: relative;
+        padding-right: 20px;
+    }
+    .sortable th:after {
+        content: '⇅';
+        position: absolute;
+        right: 5px;
+        color: #ccc;
+        font-size: 0.8em;
+    }
+    .sortable th.sort-asc:after {
+        content: '↑';
+        color: #007bff;
+    }
+    .sortable th.sort-desc:after {
+        content: '↓';
+        color: #007bff;
+    }
+    .clickable-row {
+        cursor: pointer;
+    }
+    .clickable-row:hover {
+        background-color: #f5f5f5;
+    }
+</style>
+
 <main class="container" role="main">
     {% if current_role() %}
     <h1>Shift report for {{ current_role().calendar.name }}</h1>
@@ -30,6 +60,47 @@
             </div>
         </div>
     </form>
+    
+    {% if not selected_user %}
+    <!-- All Users View - Single table with User column -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="mb-0">
+                All Users
+                <span class="badge badge-primary float-right">
+                    Total: {{ "%d"|format(report|sum(attribute='total_hours')|int) }}h {{ "%d"|format(((report|sum(attribute='total_hours') % 1) * 60)|int) }}m
+                </span>
+            </h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-sm sortable" id="all-users-table">
+                <thead>
+                <tr>
+                    <th scope="col" data-sort="string">User</th>
+                    <th scope="col" data-sort="string">Event</th>
+                    <th scope="col" data-sort="date">Start</th>
+                    <th scope="col" data-sort="date">End</th>
+                    <th scope="col" data-sort="duration">Duration</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in report %}
+                {% for shift in item.shifts %}
+                <tr class="clickable-row" data-event-id="{{ shift.event_id }}">
+                    <td>{{ item.person }}</td>
+                    <td>{{ shift.title }}</td>
+                    <td data-value="{{ shift.start.strftime('%Y-%m-%d %H:%M') }}">{{ shift.start.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td data-value="{{ shift.end.strftime('%Y-%m-%d %H:%M') }}">{{ shift.end.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td data-value="{{ shift.duration }}">{{ "%d"|format(shift.duration|int) }}h {{ "%d"|format(((shift.duration % 1) * 60)|int) }}m</td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <!-- Single User View - Grouped by person -->
     {% for item in report %}
     <div class="card mb-3">
         <div class="card-header">
@@ -41,22 +112,22 @@
             </h5>
         </div>
         <div class="card-body">
-            <table class="table table-sm">
+            <table class="table table-sm sortable">
                 <thead>
                 <tr>
-                    <th scope="col">Event</th>
-                    <th scope="col">Start</th>
-                    <th scope="col">End</th>
-                    <th scope="col">Duration</th>
+                    <th scope="col" data-sort="string">Event</th>
+                    <th scope="col" data-sort="date">Start</th>
+                    <th scope="col" data-sort="date">End</th>
+                    <th scope="col" data-sort="duration">Duration</th>
                 </tr>
                 </thead>
                 <tbody>
                 {% for shift in item.shifts %}
-                <tr>
+                <tr class="clickable-row" data-event-id="{{ shift.event_id }}">
                     <td>{{ shift.title }}</td>
-                    <td>{{ shift.start.strftime('%Y-%m-%d %H:%M') }}</td>
-                    <td>{{ shift.end.strftime('%Y-%m-%d %H:%M') }}</td>
-                    <td>{{ "%d"|format(shift.duration|int) }}h {{ "%d"|format(((shift.duration % 1) * 60)|int) }}m</td>
+                    <td data-value="{{ shift.start.strftime('%Y-%m-%d %H:%M') }}">{{ shift.start.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td data-value="{{ shift.end.strftime('%Y-%m-%d %H:%M') }}">{{ shift.end.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td data-value="{{ shift.duration }}">{{ "%d"|format(shift.duration|int) }}h {{ "%d"|format(((shift.duration % 1) * 60)|int) }}m</td>
                 </tr>
                 {% endfor %}
                 </tbody>
@@ -64,11 +135,145 @@
         </div>
     </div>
     {% endfor %}
+    {% endif %}
+    
+    <!-- Event Detail Modal -->
+    <div class="modal fade" id="eventDetailModal" tabindex="-1" role="dialog" aria-labelledby="eventDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventDetailModalLabel">Event Details</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>Title:</strong>
+                        <span id="eventTitle"></span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Description:</strong>
+                        <p id="eventDescription" class="mb-0"></p>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Start:</strong>
+                        <span id="eventStart"></span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>End:</strong>
+                        <span id="eventEnd"></span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Volunteers:</strong>
+                        <ul id="eventVolunteers" class="mb-0"></ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script type="text/javascript">
     $('.input-daterange').datepicker({
         format: 'dd-mm-yyyy',
         autoclose: true,
         weekStart: 1
+    });
+    
+    // Sortable table functionality
+    document.querySelectorAll('.sortable th').forEach(function(header) {
+        header.addEventListener('click', function() {
+            var table = this.closest('table');
+            var tbody = table.querySelector('tbody');
+            var rows = Array.from(tbody.querySelectorAll('tr'));
+            var columnIndex = Array.from(this.parentNode.children).indexOf(this);
+            var sortType = this.dataset.sort;
+            var isAsc = this.classList.contains('sort-asc');
+            
+            // Remove sort classes from all headers
+            table.querySelectorAll('th').forEach(function(th) {
+                th.classList.remove('sort-asc', 'sort-desc');
+            });
+            
+            // Add appropriate sort class
+            this.classList.add(isAsc ? 'sort-desc' : 'sort-asc');
+            
+            rows.sort(function(a, b) {
+                var aCell = a.children[columnIndex];
+                var bCell = b.children[columnIndex];
+                var aValue = aCell.dataset.value || aCell.textContent.trim();
+                var bValue = bCell.dataset.value || bCell.textContent.trim();
+                
+                var comparison = 0;
+                if (sortType === 'date') {
+                    comparison = new Date(aValue) - new Date(bValue);
+                } else if (sortType === 'duration') {
+                    comparison = parseFloat(aValue) - parseFloat(bValue);
+                } else {
+                    comparison = aValue.localeCompare(bValue);
+                }
+                
+                return isAsc ? -comparison : comparison;
+            });
+            
+            rows.forEach(function(row) {
+                tbody.appendChild(row);
+            });
+        });
+    });
+    
+    // Event detail modal functionality
+    document.querySelectorAll('.clickable-row').forEach(function(row) {
+        row.addEventListener('click', function() {
+            var eventId = this.dataset.eventId;
+            if (eventId) {
+                fetch('/api/v1/calendars/events/' + eventId + '/details')
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data) {
+                        document.getElementById('eventTitle').textContent = data.title || 'N/A';
+                        document.getElementById('eventDescription').textContent = data.description || 'No description';
+                        
+                        if (data.start) {
+                            var startDate = new Date(data.start);
+                            document.getElementById('eventStart').textContent = startDate.toLocaleString();
+                        } else {
+                            document.getElementById('eventStart').textContent = 'N/A';
+                        }
+                        
+                        if (data.end) {
+                            var endDate = new Date(data.end);
+                            document.getElementById('eventEnd').textContent = endDate.toLocaleString();
+                        } else {
+                            document.getElementById('eventEnd').textContent = 'N/A';
+                        }
+                        
+                        var volunteersList = document.getElementById('eventVolunteers');
+                        volunteersList.innerHTML = '';
+                        if (data.volunteers && data.volunteers.length > 0) {
+                            data.volunteers.forEach(function(volunteer) {
+                                var li = document.createElement('li');
+                                li.textContent = volunteer;
+                                volunteersList.appendChild(li);
+                            });
+                        } else {
+                            var li = document.createElement('li');
+                            li.textContent = 'No volunteers assigned';
+                            volunteersList.appendChild(li);
+                        }
+                        
+                        $('#eventDetailModal').modal('show');
+                    })
+                    .catch(function(error) {
+                        console.error('Error fetching event details:', error);
+                        alert('Error loading event details');
+                    });
+            }
+        });
     });
     </script>
         {% else %}

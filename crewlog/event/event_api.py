@@ -8,6 +8,7 @@ from flask import Blueprint, request, jsonify
 
 from crewlog import db
 from crewlog.event import event_dao
+from crewlog.event.models import Event, Shift
 
 bp = Blueprint("event_api", __name__, url_prefix="/api/v1/calendars/events")
 
@@ -112,6 +113,28 @@ def post_shift(person_name=None, event_id=None):
     event_dao.save_shift(event_id=event_id, new_person_name=person_name, shift_ids_to_remove=shift_ids_to_remove,
                          recur_id=recur_id, start=start, end=end)
     return '', 204
+
+
+@bp.route('/<event_id>/details', methods=['GET'])
+@flask_login.login_required
+def get_event_details(event_id):
+    """Get event details including all volunteers assigned to this event."""
+    event = event_dao.get_event(event_id)
+    if not event:
+        return jsonify({'error': 'Event not found'}), 404
+    
+    # Get all volunteers for this event
+    volunteers = [shift.person for shift in event.shifts]
+    
+    return jsonify({
+        'id': str(event.id),
+        'title': event.title,
+        'description': event.description or '',
+        'start': event.start.isoformat() + 'Z' if event.start else None,
+        'end': event.end.isoformat() + 'Z' if event.end else None,
+        'all_day': event.all_day,
+        'volunteers': volunteers
+    })
 
 
 @bp.route('/recurrent', methods=['POST'])

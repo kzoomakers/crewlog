@@ -26,35 +26,45 @@ class Calendar(db.Model):
         return loads(self.settings)
 
 
-def _gen_valid_until():
-    valid_until = date.today() + timedelta(days=7)
+def _gen_valid_until(days=7, no_expiration=False):
+    if no_expiration:
+        return None
+    valid_until = date.today() + timedelta(days=days)
     return valid_until
 
 
 class Share:
     auth_s = URLSafeSerializer(db.app.config['SECRET_KEY'], "share")
 
-    def __init__(self, role_type=None, calendar_id=None, token=None):
+    def __init__(self, role_type=None, calendar_id=None, token=None, expiration_days=7, no_expiration=False):
         if token:
             self._load_token(token=token)
         else:
             self.role_type = role_type
             self.calendar_id = calendar_id
-            self.valid_until = _gen_valid_until()
+            self.valid_until = _gen_valid_until(expiration_days, no_expiration)
 
     def generate_token(self):
+        valid_until_str = self.valid_until.strftime('%d-%m-%Y') if self.valid_until else 'never'
         return self.auth_s.dumps(
             {"role_type": self.role_type, "calendar_id": str(self.calendar_id),
-             "valid_until": self.valid_until.strftime('%d-%m-%Y')})
+             "valid_until": valid_until_str})
 
     def _load_token(self, token):
         try:
             data = self.auth_s.loads(token)
             self.role_type = int(data["role_type"])
             self.calendar_id = uuid.UUID(data["calendar_id"])
-            self.valid_until = datetime.strptime(data["valid_until"], '%d-%m-%Y')
+            valid_until_str = data["valid_until"]
+            if valid_until_str == 'never':
+                self.valid_until = None
+            else:
+                self.valid_until = datetime.strptime(valid_until_str, '%d-%m-%Y')
         except BadSignature:
             return False
 
     def is_valid(self):
-        return self.valid_until and datetime.now() < self.valid_until
+        # If valid_until is None, the link never expires
+        if self.valid_until is None:
+            return True
+        return datetime.now() < self.valid_until
