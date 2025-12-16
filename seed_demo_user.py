@@ -19,14 +19,14 @@ from crewlog.auth.auth_dao import get_user, add_user
 def seed_demo_user():
     """Create demo user if it doesn't exist, or update existing to be admin."""
     with application.app_context():
-        demo_email = "demo@github.com"
-        demo_password = "demo"
+        demo_email = "demo@example.com"
+        demo_password = "demo123"
         
         # Check if demo user already exists
         existing_user = get_user(demo_email)
         if existing_user:
-            # Update existing user to be admin if not already
-            if not existing_user.is_admin:
+            # Update existing user to be admin and verified if not already
+            if not existing_user.is_admin or not existing_user.is_verified:
                 existing_user.is_admin = True
                 existing_user.is_verified = True
                 db.session.merge(existing_user)

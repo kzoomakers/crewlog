@@ -1,147 +1,274 @@
-# CrewLog
-CrewLog is an easy to use sign up sheet for volunteers. Also can be used for various events planning like football matches
-or going out with friends.
+# CrewLog - Calendar and Event Management
 
-# demo
-URL: https://crewlog-app.herokuapp.com (can take few moments for a cold boot)
-user: demo@github.com
-pass: demo
+CrewLog is a calendar and event management application built with a React frontend and Flask API backend.
 
-Registration doesn't require an email verification (but it will still annoy you because this is the only way to recover lost password).
-# features
-* Plan events. Even recurrent ones. Resize and drag em how you want
-* Sign up yourself or your friend for a shift
-* Share calendar with your collective/family/friends
-* Count number of shifts per person for a given period
-* Control an access
-* Different colors for events based on number of people signed up: gray - nobody yet, orange - one person, green - two or more
-* Mobile friendly
-* Powered by Python, Flask, Flask-Login, Fullcalendar, rrule, WTForms, SQLAlchemy and many more
+## Requirements
 
-# how to use
-## create an event
-1. Click the *Edit* button to activate an edit mode
-2. Select the date to create an event (you can select multiple days, resize and drag events)
-3. Put in the event title, description and recurrent preference
-4. Click the *Save changes* button
-5. Click the *Stop* button to go back to the View mode
-## sign up for an event
-1. Select an event
-2. Press the *I'm in* button or manually put a name into the field
-3. Click the *Save changes* button
+- **Python**: 3.8+
+- **Node.js**: 16+ (for frontend development)
+- **npm**: 8+
 
-# screenshots
-![week view](/screenshots/week_view.png?raw=true "Week View")
-![event view](/screenshots/event_view.png?raw=true "Event View")
-![create view](/screenshots/create_view.png?raw=true "Create View")
-![report_view](/screenshots/report_view.png?raw=true "Report View")
+## Architecture
 
-# Local Development with Docker Compose
+- **Frontend**: React 18 with React Bootstrap and FullCalendar
+- **Backend**: Flask REST API with SQLAlchemy ORM
+- **Database**: PostgreSQL (production) or SQLite (development)
 
-## Prerequisites
-- Docker and Docker Compose installed on your system
-- Git (to clone the repository)
+## Features
+
+- 📅 Interactive calendar with FullCalendar
+- 👥 User authentication and authorization
+- 🔗 Calendar sharing with role-based permissions
+- 📊 Event reporting
+- 🔄 Recurring events support
+- 👤 Volunteer/shift management
+- 🛠️ Admin dashboard for user and email management
 
 ## Quick Start
 
-1. **Clone the repository** (if you haven't already):
-   ```bash
-   git clone <repository-url>
-   cd crewlog
-   ```
+### Using Docker (Recommended)
 
-2. **Configure environment variables**:
-   ```bash
-   cp .env.example .env
-   ```
-   
-   Edit the `.env` file and update the following variables:
-   - `SECRET_KEY`: Change to a secure random string (required for production)
-   - `SQLALCHEMY_DATABASE_URI`: Database connection string (default: SQLite)
-   - `APP_URL`: Your application URL (default: http://localhost:5001)
-   - `SMTP_*`: Email server settings (optional, for password recovery)
-
-3. **Build and start the application**:
-   ```bash
-   docker-compose up --build
-   ```
-   
-   The application will be available at: **http://localhost:5001**
-
-4. **Database migrations** are automatically applied on startup. If you need to run them manually:
-   ```bash
-   docker-compose exec crewlog flask db upgrade
-   ```
-
-## Configuration Options
-
-### Database Options
-
-**SQLite (Default)**:
-```env
-SQLALCHEMY_DATABASE_URI=sqlite:///resources/database.db
-```
-Data persists in `./crewlog/resources/database.db`
-
-**PostgreSQL**:
-```env
-SQLALCHEMY_DATABASE_URI=postgresql://username:password@host:5432/database_name
-```
-
-### Email Configuration (Optional)
-
-For password recovery and email verification, configure SMTP settings:
-```env
-SMTP_LOGIN=your-email@example.com
-SMTP_MAILBOX=your-email@example.com
-SMTP_PASSWORD=your-password
-SMTP_PORT=587
-SMTP_SERVER=smtp.example.com
-```
-
-## Docker Commands
-
-**Start the application**:
+#### Production Build
 ```bash
-docker-compose up
-```
-
-**Start in detached mode** (background):
-```bash
-docker-compose up -d
-```
-
-**Stop the application**:
-```bash
-docker-compose down
-```
-
-**View logs**:
-```bash
-docker-compose logs -f crewlog
-```
-
-**Rebuild after code changes**:
-```bash
+# Build and run the production container
 docker-compose up --build
 ```
 
-**Access the container shell**:
+The application will be available at `http://localhost:5002`
+
+#### Development Mode
 ```bash
-docker-compose exec crewlog bash
+# Run with hot-reloading for both frontend and backend
+docker-compose -f docker-compose.dev.yml up --build
 ```
 
-## Development Notes
+- Frontend (React): `http://localhost:3000`
+- Backend (Flask API): `http://localhost:5000`
 
-- The SQLite database file is persisted in `./crewlog/resources/` via Docker volume
-- The application runs on port 5001 by default (configurable in [`docker-compose.yml`](docker-compose.yml:11))
-- Hot reload is enabled in development mode
-- Tested with SQLite and PostgreSQL databases
+### Manual Setup with virtualenv
 
-## Heroku Deployment
+#### Quick Start (Using Script)
 
-The repository contains a [`Procfile`](Procfile:1) for Heroku deployment. The Heroku-specific configuration has been preserved for backward compatibility.
+The easiest way to run the backend locally:
 
-# TODO
-* add LDAP auth
-* ????
+```bash
+# Make the script executable (first time only)
+chmod +x scripts/start-be.sh
+
+# Run the backend
+bash scripts/start-be.sh
+```
+
+This script will:
+- Create the database directory if needed
+- Set up environment variables
+- Initialize the database
+- Seed a demo user
+- Start the Flask server on `http://localhost:5001`
+
+> **Note for macOS users:** Port 5000 is used by AirPlay Receiver on macOS Monterey+, so we use port 5001 instead.
+
+#### Step-by-Step Setup
+
+If you prefer to set things up manually:
+
+1. Create and activate a virtual environment:
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate on macOS/Linux
+source venv/bin/activate
+
+# Activate on Windows
+venv\Scripts\activate
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Create the database directory:
+```bash
+mkdir -p crewlog/resources
+```
+
+4. Set up environment variables:
+```bash
+# Option A: Copy and edit the example file (recommended)
+cp .env.example .env
+# Then edit .env with your settings
+
+# Option B: Export variables directly (macOS/Linux)
+export FLASK_APP=crewlog.main:application
+export FLASK_ENV=development
+export SECRET_KEY=your-secret-key-here
+# Note: Don't set SQLALCHEMY_DATABASE_URI - the default uses an absolute path that works correctly
+export APP_URL=http://localhost:3000
+
+# Option B: Set variables on Windows (PowerShell)
+$env:FLASK_APP="crewlog.main:application"
+$env:FLASK_ENV="development"
+$env:SECRET_KEY="your-secret-key-here"
+$env:APP_URL="http://localhost:3000"
+```
+
+5. Initialize the database:
+```bash
+flask db upgrade
+python seed_demo_user.py
+```
+
+6. Run the Flask server:
+```bash
+flask run --port=5000
+```
+
+The Flask API will be available at `http://localhost:5001`
+
+#### Frontend (React)
+
+**Prerequisites:** Node.js 16+ is required. Check your version with `node -v`.
+
+**Using the script (recommended):**
+```bash
+bash scripts/start-fe.sh
+```
+
+**Or manually:**
+
+1. Open a new terminal and navigate to the frontend directory:
+```bash
+cd frontend
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
+npm start
+```
+
+The React app will be available at `http://localhost:3000`
+
+#### Troubleshooting
+
+**"unable to open database file" error:**
+- Make sure the `crewlog/resources/` directory exists: `mkdir -p crewlog/resources`
+- Don't override `SQLALCHEMY_DATABASE_URI` - the default settings use an absolute path that works correctly
+
+**".env files present" warning:**
+- This is just a tip. The app includes `python-dotenv` so `.env` files are automatically loaded
+
+**Node.js "Library not loaded" or ICU errors (macOS):**
+- This means your Node.js version is too old or corrupted
+- The frontend requires Node.js 16+
+- Fix options:
+  1. Download Node.js 18+ from https://nodejs.org/
+  2. Use nvm: `brew install nvm && nvm install 18 && nvm use 18`
+  3. Use Homebrew: `brew uninstall node@12 && brew install node@18`
+- After installing, verify with: `node -v` (should show v16+ or v18+)
+
+## Project Structure
+
+```
+crewlog/
+├── frontend/                 # React frontend
+│   ├── public/
+│   ├── src/
+│   │   ├── components/      # Reusable components
+│   │   ├── contexts/        # React contexts (Auth)
+│   │   ├── pages/           # Page components
+│   │   ├── services/        # API services
+│   │   └── App.js           # Main app component
+│   └── package.json
+├── crewlog/                  # Flask backend
+│   ├── api/                  # JSON API endpoints
+│   ├── auth/                 # Authentication module
+│   ├── calendar/             # Calendar module
+│   ├── event/                # Event module
+│   ├── admin/                # Admin module
+│   ├── app.py                # Main Flask application
+│   └── database.py           # Database utilities
+├── migrations/               # Database migrations
+├── Dockerfile                # Production Dockerfile
+├── Dockerfile.dev            # Development Dockerfile
+├── docker-compose.yml        # Production compose
+├── docker-compose.dev.yml    # Development compose
+└── requirements.txt          # Python dependencies
+```
+
+## API Endpoints
+
+### Authentication
+- `GET /api/v1/auth/me` - Get current user
+- `POST /api/v1/auth/login` - Login
+- `POST /api/v1/auth/register` - Register
+- `POST /api/v1/auth/logout` - Logout
+- `POST /api/v1/auth/forgot` - Request password reset
+- `POST /api/v1/auth/restore/:token` - Reset password
+
+### Users
+- `PUT /api/v1/users/` - Update profile
+- `POST /api/v1/users/password` - Change password
+- `POST /api/v1/users/resend_email` - Resend verification email
+
+### Calendars
+- `POST /api/v1/calendars/` - Create calendar
+- `DELETE /api/v1/calendars/` - Delete calendar
+- `POST /api/v1/calendars/default` - Set default calendar
+- `POST /api/v1/calendars/share` - Generate share link
+- `PUT /api/v1/calendars/share` - Update share role
+- `GET /api/v1/calendars/shares` - Get all shares
+- `POST /api/v1/calendars/settings` - Save settings
+
+### Events
+- `GET /api/v1/calendars/events/` - Get events
+- `POST /api/v1/calendars/events/` - Create/update event
+- `DELETE /api/v1/calendars/events/` - Delete event
+- `GET /api/v1/calendars/events/:id/details` - Get event details
+- `POST /api/v1/calendars/events/shifts` - Save shifts
+- `POST /api/v1/calendars/events/recurrent` - Update recurrent event
+
+### Admin
+- `GET /api/v1/admin/users` - Get all users
+- `PUT /api/v1/admin/users/:id` - Update user
+- `POST /api/v1/admin/users/:id/reset-password` - Reset password
+- `POST /api/v1/admin/users/:id/verify` - Verify user
+- `DELETE /api/v1/admin/users/:id/delete` - Delete user
+- `GET /api/v1/admin/email/configs` - Get email configs
+- `POST /api/v1/admin/email/configs` - Create email config
+- `POST /api/v1/admin/email/test` - Send test email
+
+## User Roles
+
+- **Owner (100)**: Full access including delete calendar
+- **Manager (50)**: Can edit events and manage shares
+- **User (10)**: Can view and sign up for shifts
+
+## Demo Account
+
+After running `seed_demo_user.py`, you can login with:
+- Email: `demo@example.com`
+- Password: `demo123`
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SECRET_KEY` | Flask secret key | Required |
+| `SQLALCHEMY_DATABASE_URI` | Database connection string | SQLite |
+| `APP_URL` | Application URL for emails | http://localhost:3000 |
+| `SMTP_SERVER` | SMTP server hostname | - |
+| `SMTP_PORT` | SMTP server port | - |
+| `SMTP_LOGIN` | SMTP login username | - |
+| `SMTP_PASSWORD` | SMTP login password | - |
+| `SMTP_MAILBOX` | From email address | - |
+
+## License
+
+MIT License

@@ -10,7 +10,7 @@ from crewlog import db
 from crewlog.event import event_dao
 from crewlog.event.models import Event, Shift
 
-bp = Blueprint("event_api", __name__, url_prefix="/api/v1/calendars/events")
+bp = Blueprint("event_api", __name__, url_prefix="/legacy/calendars/events")
 
 
 @bp.route('/', methods=['GET'])

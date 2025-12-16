@@ -1,0 +1,121 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Calendar Container */
+#calendar-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Custom Calendar Styles */
+.fc-event {
+  cursor: pointer;
+}
+
+.fc-toolbar-title {
+  font-size: 1.5rem !important;
+}
+
+/* Auth Pages */
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+}
+
+.auth-form {
+  width: 100%;
+  max-width: 400px;
+  padding: 15px;
+}
+
+.auth-form .form-control {
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+  font-size: 16px;
+}
+
+/* Navbar */
+.navbar-brand {
+  font-weight: bold;
+}
+
+/* Modal */
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+}
+
+/* Flash Messages */
+.alert-container {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 1050;
+  max-width: 400px;
+}
+
+/* Admin Dashboard */
+.admin-sidebar {
+  min-height: calc(100vh - 56px);
+  background-color: #f8f9fa;
+}
+
+.admin-content {
+  padding: 20px;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Event Colors */
+.event-no-volunteers {
+  background-color: #9F9C99 !important;
+  border-color: #9F9C99 !important;
+}
+
+.event-one-volunteer {
+  background-color: #E08119 !important;
+  border-color: #E08119 !important;
+}
+
+.event-multiple-volunteers {
+  background-color: #88B04B !important;
+  border-color: #88B04B !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fc-toolbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .fc-toolbar-title {
+    font-size: 1.2rem !important;
+  }
+}

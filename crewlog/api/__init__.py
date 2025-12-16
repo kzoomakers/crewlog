@@ -1,0 +1,1 @@
+"""API module for CrewLog - provides JSON API endpoints for React frontend."""

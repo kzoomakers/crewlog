@@ -6,7 +6,7 @@ from werkzeug.utils import redirect
 from crewlog.auth import auth_dao
 from crewlog.auth.auth import render_password
 
-bp = Blueprint("auth_api", __name__, url_prefix="/api/v1/users")
+bp = Blueprint("auth_api", __name__, url_prefix="/legacy/users")
 
 
 @bp.route("/", methods=['PUT', 'POST'])

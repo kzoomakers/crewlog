@@ -1,2 +1,2 @@
 release: flask db upgrade
-web: gunicorn crewlog.main
+web: gunicorn crewlog.app:application

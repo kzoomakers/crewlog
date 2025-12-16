@@ -3,20 +3,18 @@ import os
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_talisman import Talisman
+from flask_cors import CORS
 from flask_wtf.csrf import CSRFProtect
 
-csp = {
-    'script-src': ['\'unsafe-inline\'', '\'self\'', 'code.jquery.com', 'cdn.jsdelivr.net',
-                   'stackpath.bootstrapcdn.com', 'cdnjs.cloudflare.com']
-}
+# Create Flask app
+application = Flask(__name__,
+                   static_folder='../frontend/build',
+                   static_url_path='')
 
-application = Flask(__name__)
-# Disable HTTPS redirect in development mode
-force_https = os.environ.get('FLASK_ENV') != 'development'
-talisman = Talisman(application, content_security_policy=csp, force_https=force_https)
-CSRFProtect(application)
+# Configuration
 application.config.from_object('crewlog.default_settings')
+
+# Override with environment variables
 if os.environ.get("SECRET_KEY"):
     application.secret_key = os.environ.get("SECRET_KEY")
 if os.environ.get("SQLALCHEMY_DATABASE_URI"):
@@ -36,5 +34,22 @@ if os.environ.get("SMTP_PORT"):
 if os.environ.get("APP_URL"):
     application.config['APP_URL'] = os.environ.get("APP_URL")
 
+# Enable CORS for API routes
+CORS(application,
+     resources={r"/api/*": {"origins": "*"}},
+     supports_credentials=True,
+     allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+
+# Initialize CSRF protection but disable it globally
+# We'll enable it only for non-API routes
+csrf = CSRFProtect()
+csrf.init_app(application)
+
+# Disable CSRF for all routes by default
+application.config['WTF_CSRF_ENABLED'] = False
+application.config['WTF_CSRF_CHECK_DEFAULT'] = False
+
+# Initialize database
 db = SQLAlchemy(application)
 migrate = Migrate(application, db)

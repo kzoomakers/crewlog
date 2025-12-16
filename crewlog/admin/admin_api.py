@@ -7,7 +7,7 @@ from crewlog import db
 from crewlog.admin import admin_dao
 from crewlog.auth.models import EmailConfig
 
-bp = Blueprint("admin_api", __name__, url_prefix="/api/v1/admin")
+bp = Blueprint("admin_api", __name__, url_prefix="/legacy/admin")
 
 
 # ============ User Management API ============

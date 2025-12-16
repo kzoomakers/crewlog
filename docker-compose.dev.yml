@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Flask API backend
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: crewlog-api
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=crewlog.main:application
+      - FLASK_ENV=development
+      - SECRET_KEY=${SECRET_KEY:-change-me-to-something-secure}
+      - SQLALCHEMY_DATABASE_URI=${SQLALCHEMY_DATABASE_URI:-sqlite:////app/crewlog/resources/database.db}
+      - APP_URL=${APP_URL:-http://localhost:3000}
+      - SMTP_LOGIN=${SMTP_LOGIN:-}
+      - SMTP_MAILBOX=${SMTP_MAILBOX:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_PORT=${SMTP_PORT:-}
+      - SMTP_SERVER=${SMTP_SERVER:-}
+    volumes:
+      - ./crewlog:/app/crewlog
+      - ./migrations:/app/migrations
+      - ./crewlog/resources:/app/crewlog/resources
+    networks:
+      - crewlog-network
+
+  # React frontend (development server)
+  frontend:
+    image: node:18-alpine
+    container_name: crewlog-frontend
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm start"
+    networks:
+      - crewlog-network
+    depends_on:
+      - api
+
+networks:
+  crewlog-network:
+    driver: bridge

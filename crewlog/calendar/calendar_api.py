@@ -6,7 +6,7 @@ from crewlog.auth import auth_dao
 from crewlog.auth.models import Role
 from crewlog.calendar import calendar_dao
 
-bp = Blueprint("calendar_api", __name__, url_prefix="/api/v1/calendars")
+bp = Blueprint("calendar_api", __name__, url_prefix="/legacy/calendars")
 
 
 @bp.route('/', methods=['POST'])

@@ -1,3 +1,21 @@
+# Build stage for React frontend
+FROM node:18-alpine AS frontend-build
+
+WORKDIR /app/frontend
+
+# Copy frontend package files
+COPY frontend/package.json frontend/package-lock.json* ./
+
+# Install dependencies
+RUN npm install
+
+# Copy frontend source
+COPY frontend/ ./
+
+# Build the React app
+RUN npm run build
+
+# Production stage
 FROM python:3.9-slim
 
 WORKDIR /app
@@ -15,6 +33,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Copy application code
 COPY . .
+
+# Copy built React app from frontend-build stage
+COPY --from=frontend-build /app/frontend/build ./frontend/build
 
 # Create directory for SQLite database
 RUN mkdir -p /app/crewlog/resources
